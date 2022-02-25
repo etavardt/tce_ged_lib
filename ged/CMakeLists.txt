@@ -1,30 +1,29 @@
-project(ged LANGUAGES C CXX)
+project(ged LANGUAGES CXX)
 include(CMakePrintHelpers)
 #Example usage: cmake_print_variables(SOURCE_FILES)
 # cmake_print_variables(CMAKE_CPP_LINKER_LAUNCHER)
 cmake_print_variables(libbacktrace_SOURCE_DIR)
 include_directories(
-    src/
+    src/include/
+    ../tcelib/src/include/tcelib/
     ../3rdParty/easyloggingpp/src/
-    ../build/
     ${libbacktrace_SOURCE_DIR}/src/
     ${libbacktrace_BINARY_DIR}/gen
 )
 
 file(GLOB SOURCE_FILES LIST_DIRECTORIES false
     ../3rdParty/easyloggingpp/src/*.cc
-    src/*.cpp
-    src/*.c
+    src/cpp/*.cpp
 )
 
 file(GLOB HEADER_FILES LIST_DIRECTORIES false
     ../3rdParty/easyloggingpp/src/*.h
-    src/*.hpp
-    src/*.h
+    src/include/*.hpp
 )
 
-add_executable(bob ${SOURCE_FILES} ${HEADER_FILES})
-target_include_directories(bob PUBLIC 3rdParty/easyloggingpp)
+add_executable(ged ${SOURCE_FILES})
+#target_include_directories(ged PUBLIC 3rdParty/easyloggingpp)
+#target_link_directories(ged build/tcelib)
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     if (APPLE)
@@ -51,34 +50,25 @@ if (CMAKE_BUILD_TYPE STREQUAL "Debug")
                     "${DSYMUTIL_PROGRAM} <TARGET>")
         endif()
 
-        target_compile_options(bob PUBLIC "-DDEBUG")
-        target_link_libraries(bob backtrace)
+        target_compile_options(ged PUBLIC "-DDEBUG")
+        target_link_libraries(ged backtrace tcelib)
     else()
-        target_compile_options(bob PUBLIC "SHELL:-O0 -pg -fno-builtin -Wall -Wextra -static -m64 -DDEBUG")
-        target_link_options(bob PUBLIC "SHELL:-O0 -pg -fno-builtin -Wall -Wextra -static -m64 -DDEBUG" "LINKER:-static,--disable-dynamicbase,--disable-reloc-section") #this works as well
-        target_link_libraries(bob ${libbacktrace_BINARY_DIR}/libbacktrace.a)
+        target_compile_options(ged PUBLIC "SHELL:-O0 -pg -fno-builtin -Wall -Wextra -static -m64 -DDEBUG")
+        target_link_options(ged PUBLIC "SHELL:-O0 -pg -fno-builtin -Wall -Wextra -static -m64 -DDEBUG" "LINKER:-static,--disable-dynamicbase,--disable-reloc-section") #this works as well
+        target_link_libraries(ged ${libbacktrace_BINARY_DIR}/libbacktrace.a tcelib)
     endif()
 endif()
-
-foreach(dir IN ITEMS "bkgs" "cols" "maps" "objs" "scns" "srfs")
-    add_custom_command(
-        TARGET bob POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_directory
-        ${CMAKE_CURRENT_SOURCE_DIR}/${dir} ${PROJECT_SOURCE_DIR}/build/${dir}
-        COMMENT "Copying ${dir}" VERBATIM
-    )
-endforeach()
 
 # TomC -- Unit Testing
 enable_testing()
 
 file(GLOB TEST_SOURCE_FILES LIST_DIRECTORIES false test/*.cpp)
 list(FILTER SOURCE_FILES EXCLUDE REGEX ".*main.cpp$")
-add_executable(bob_test ${TEST_SOURCE_FILES} ${SOURCE_FILES} ${HEADER_FILES})
-target_link_libraries(bob_test gtest_main)
+add_executable(ged_test ${TEST_SOURCE_FILES} ${SOURCE_FILES} ${HEADER_FILES})
+target_link_libraries(ged_test gtest_main tcelib)
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-    target_link_libraries(bob_test ${libbacktrace_BINARY_DIR}/libbacktrace.a)
+    target_link_libraries(ged_test ${libbacktrace_BINARY_DIR}/libbacktrace.a)
 endif ()
 
 include(GoogleTest)
-gtest_discover_tests(bob_test)
+gtest_discover_tests(ged_test)

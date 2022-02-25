@@ -10,7 +10,6 @@ cmake_print_variables(CMAKE_CURRENT_SOURCE_DIR)
 include_directories(
     src/include/tcelib
     ../3rdParty/easyloggingpp/src/
-    ../build/
     ${libbacktrace_SOURCE_DIR}/src/
     ${libbacktrace_BINARY_DIR}/gen
 )
@@ -18,28 +17,14 @@ include_directories(
 file(GLOB SOURCE_FILES LIST_DIRECTORIES false
     ../3rdParty/easyloggingpp/src/*.cc
     src/cpp/*.cpp
-#    src/cpp/*.c
 )
 
 file(GLOB HEADER_FILES LIST_DIRECTORIES false
     ../3rdParty/easyloggingpp/src/*.h
     src/include/tcelib/*.hpp
- #   src/include/*.h
 )
 
-#add_executable(bob ${SOURCE_FILES} ${HEADER_FILES})
-#add_library(tcelib STATIC ${SOURCE_FILES} ${HEADER_FILES})
 add_library(tcelib STATIC ${SOURCE_FILES})
-#target_include_directories(mylib PUBLIC
-#  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/mylib>
-#  $<INSTALL_INTERFACE:include/mylib>  # <prefix>/include/mylib
-#)
-
-#target_include_directories(tcelib PUBLIC 3rdParty/easyloggingpp
-#  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/tcelib>
-#  $<INSTALL_INTERFACE:include/tcelib>  # <prefix>/include/
-#)
-
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     if (APPLE)
@@ -74,15 +59,6 @@ if (CMAKE_BUILD_TYPE STREQUAL "Debug")
         target_link_libraries(tcelib ${libbacktrace_BINARY_DIR}/libbacktrace.a)
     endif()
 endif()
-
-# foreach(dir IN ITEMS "bkgs" "cols" "maps" "objs" "scns" "srfs")
-#     add_custom_command(
-#         TARGET tcelib POST_BUILD
-#         COMMAND ${CMAKE_COMMAND} -E copy_directory
-#         ${CMAKE_CURRENT_SOURCE_DIR}/${dir} ${PROJECT_SOURCE_DIR}/build/${dir}
-#         COMMENT "Copying ${dir}" VERBATIM
-#     )
-# endforeach()
 
 # TomC -- Unit Testing
 enable_testing()
