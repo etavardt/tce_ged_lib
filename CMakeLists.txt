@@ -1,12 +1,8 @@
 #set(CMAKE_VERBOSE_MAKEFILE ON)
 cmake_minimum_required(VERSION 3.21.1)
 
-#project(tce LANGUAGES C CXX)
 project(tce LANGUAGES CXX)
 
-#set(CMAKE_C_STANDARD 17)
-#set(CMAKE_C_STANDARD_REQUIRED ON)
-#set(CMAKE_C_EXTENSIONS ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS ON)
@@ -58,5 +54,5 @@ FetchContent_MakeAvailable(googletest)
 enable_testing()
 
 add_subdirectory(tcelib)
-#add_subdirectory(ged)
+add_subdirectory(ged)
 #add_subdirectory(cppcheck)
