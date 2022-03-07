@@ -1,9 +1,9 @@
 #set(CMAKE_VERBOSE_MAKEFILE ON)
 cmake_minimum_required(VERSION 3.21.1)
 
-project(tce LANGUAGES CXX)
+project(tce LANGUAGES CXX C)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS ON)
 
@@ -46,6 +46,14 @@ FetchContent_Declare(
     googletest
     URL https://github.com/google/googletest/archive/e2239ee6043f73722e7aa812a459f54a28552929.zip
 )
+
+# set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
+# find_package(SDL2 REQUIRED)
+# #find_file(SDL2_INCLUDE_DIR NAME SDL.h HINTS SDL2)
+# #find_library(SDL2_LIBRARY NAME SDL2)
+# cmake_print_variables(SDL2_INCLUDE_DIR)
+# cmake_print_variables(SDL2_LIBRARY)
+
 
 # For Windows: Prevent overriding the parent project's compiler/linker settings
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)

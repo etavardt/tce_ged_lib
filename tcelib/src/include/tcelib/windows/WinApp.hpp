@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// App.h
+// WinApp.h
 //
 // Description:
 // A custom foundation base Application Class to aid in starting and developing
@@ -8,19 +8,10 @@
 // main function is meant to be hidden in the foundation library.
 //
 // Usage:
-// Step 1: Create your App Class and extend App as public
+// Step 1: Create your App Class and extend WinApp as public
 //   i.e.:
-//      class YourApp : public App {
-//      ...
-//      public:
-//
-//      ...
-//      }
-// Step 2: Define a protected static pointer for your App in your App Class
-//   i.e.:
-//      protected:
-//      static YourApp *yourApp;
-// Step 3: Declare, Create and follow a Singleton getInstance function for your app
+//      class YourApp : public WinApp {...}
+// Step 2: Create and follow a Singleton getInstance function for your app
 //   i.e.:
 //      YourApp &YourApp::yourApp = YourApp::getInstance();
 //
@@ -33,25 +24,31 @@
 ///////////////////////////////////////////////////////////////////////////////
 #pragma once
 
-class App {
-  protected:
-    static App *app;
+#include <windows.h>
+//#include "App.h"
 
-    App() = default; // Default constructor hidden to make it a singleton
-    App(App const &) = delete;
-    virtual ~App() = default;
+class WinApp { //: public App { // To inherit or not inherit App
+  protected:
+    static WinApp *winApp;
+
+    WinApp() = default; // Default constructor hidden to make it a singleton
+    virtual ~WinApp() = default;
 
   private:
+    HINSTANCE hInstance;
+    HINSTANCE hPrevInstance;
+    LPSTR lpCmdLine;
+    int nCmdShow;
 
-    int argCnt = 0;
-    char **argList = nullptr;
-    virtual int runApp() = 0;
+    //int argCnt = 0;
+    //char **argList = nullptr;
 
   public:
-    void operator=(App const &) = delete;
+    WinApp(WinApp const &) = delete;
+    void operator=(WinApp const &) = delete;
 
-    static App &getApp();
-
+    static WinApp &getApp();
+    virtual int runApp() = 0;
     virtual int processCmdLine(int _argCnt, char **_argList) {
         argCnt = _argCnt;
         argList = _argList;
@@ -59,5 +56,5 @@ class App {
     }
     char *getAppFileName() { return argList[0]; }
 
-    friend int main(int ac, char **av);
+    friend int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow);
 };
