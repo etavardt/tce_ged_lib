@@ -27,7 +27,6 @@ int main(int ac, char **av) {
     } catch (...) {
         LOG(ERROR) << "Unknown Exception caught in main" << endl;
     }
-    if (App::app != nullptr)
-        delete App::app;
+
     return 0;
 } /* end of main() */

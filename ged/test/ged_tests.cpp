@@ -2,7 +2,7 @@
 
 //#include "App.hpp"
 #include "easylogging++.h"
-#include "ged.hpp"
+#include "GedApp.hpp"
 /*
 class GedApp : public App {
 public:
