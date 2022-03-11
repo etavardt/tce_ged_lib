@@ -1,11 +1,11 @@
 #include "GedApp.hpp"
 
-#include "easylogging++.h"
 #include <SDL2/SDL.h>
+#include "easylogging++.h"
 
 #include "String.hpp"
 #include "Exception.hpp"
-#include "SdlWin.hpp"
+#include "GedWindow.hpp"
 
 GedApp& GedApp::gedApp = GedApp::getInstance();
 
@@ -17,7 +17,7 @@ GedApp &GedApp::getInstance() {
 
 int GedApp::runApp() {
     LOG(DEBUG) << "Initializing SDL.";
-    throw Exception("Test");
+
     /* Initialize defaults, Video and Audio */
     if((SDL_Init(SDL_INIT_VIDEO|SDL_INIT_AUDIO) == -1)) {
         String msg = getSdlErrorMsg("SDL_Init failed");
@@ -27,31 +27,22 @@ int GedApp::runApp() {
     LOG(DEBUG) << "SDL initialized.";
 
     // TODO: Do App Stuff Here!
-    SdlWin win;
-    LOG(DEBUG) << "Pre win.init().";
-    win.init();
+    GedWindow win;
+
     LOG(DEBUG) << "Pre win.createWindow().";
     win.createWindow();
     LOG(DEBUG) << "Pre win.show().";
     win.show();
     LOG(DEBUG) << "Pre event loop().";
 
-    SDL_Event event;
-    do {
-        event = win.pullEvent();
-        switch (event.type) {
-        default:
-            break;
-        };
-        // TODO: Timeing and Graphics processing.
-    } while (event.type != SDL_QUIT);
+    App::runApp();
 
-    LOG(DEBUG) << "Quiting SDL.\n";
+    LOG(DEBUG) << "Quiting SDL.";
 
     /* Shutdown all subsystems */
     SDL_Quit();
 
-    LOG(DEBUG) << "Quiting....\n";
+    LOG(DEBUG) << "Quiting....";
 
     return 0;
 }

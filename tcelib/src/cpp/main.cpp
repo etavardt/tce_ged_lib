@@ -13,6 +13,7 @@ using std::cout;
 using std::cerr;
 using std::endl;
 
+extern "C"
 int main(int ac, char **av) {
     try {
         START_EASYLOGGINGPP(ac, av);
