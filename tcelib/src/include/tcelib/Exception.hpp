@@ -7,12 +7,12 @@
 #include "StackTrace.hpp"
 
 class Exception : public std::logic_error {
-    public:
+  public:
     explicit Exception(const String& arg) : std::logic_error(arg) {}
 
-    const String getMsg();
+    virtual const String getMsg();
     SharedStringPointer getStackTrace();
 
-    private:
+  private:
     StackTrace &st = StackTrace::getInstance();
 };

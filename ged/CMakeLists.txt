@@ -25,7 +25,8 @@ file(GLOB HEADER_FILES LIST_DIRECTORIES false
 )
 
 add_executable(ged ${SOURCE_FILES})
-target_link_libraries(ged SDL2 SDL2main setupapi imm32 winmm version)
+target_link_libraries(ged tcelib)
+target_link_libraries(ged mingw32 SDL2main SDL2 setupapi imm32 winmm version)
 #target_include_directories(ged PUBLIC 3rdParty/easyloggingpp)
 #target_link_directories(ged build/tcelib)
 
@@ -56,14 +57,15 @@ if (CMAKE_BUILD_TYPE STREQUAL "Debug")
 
         target_compile_options(ged PUBLIC "-DDEBUG")
 #        target_link_libraries(ged SDL2 SDL2main setupapi imm32 winmm version)
-        target_link_libraries(ged backtrace tcelib)
+#        target_link_libraries(ged backtrace tcelib)
+        target_link_libraries(ged backtrace)
     else()
         target_compile_options(ged PUBLIC "SHELL:-O0 -pg -fno-builtin -Wall -Wextra -static -m64 -DDEBUG")
 #        target_link_options(ged PUBLIC "SHELL:-O0 -pg -fno-builtin -Wall -Wextra -static -m64 -DDEBUG" "LINKER:-static,--disable-dynamicbase,--disable-reloc-section") #this works as well
-        target_link_options(ged PUBLIC "SHELL:-O0 -pg -fno-builtin -Wall -Wextra -static -m64 -DDEBUG" ) #this works as well
+        target_link_options(ged PUBLIC "SHELL:-O0 -pg -fno-builtin -Wall -Wextra -static -m64 -DDEBUG") #this works as well
 #        target_link_libraries(ged SDL2 SDL2main ${libbacktrace_BINARY_DIR}/libbacktrace.a tcelib)
 #        target_link_libraries(ged SDL2 SDL2main setupapi imm32 winmm version)
-        target_link_libraries(ged tcelib)
+#        target_link_libraries(ged tcelib)
 #        target_link_libraries(ged ${SDL2_LIBRARY})
         endif()
 endif()

@@ -33,20 +33,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 #pragma once
 
-class App {
-  protected:
-    static App *app;
+#include "EventHandler.hpp"
 
-    App() = default; // Default constructor hidden to make it a singleton
-    App(App const &) = delete;
-    virtual ~App() = default;
-
-  private:
-
-    int argCnt = 0;
-    char **argList = nullptr;
-    virtual int runApp() = 0;
-
+class App : public EventHandler {
   public:
     void operator=(App const &) = delete;
 
@@ -60,4 +49,22 @@ class App {
     char *getAppFileName() { return argList[0]; }
 
     friend int main(int ac, char **av);
+
+  protected:
+    static App *app;
+
+    App(); // Default constructor hidden to make it a singleton
+    App(App const &) = delete;
+    virtual ~App() = default;
+
+    virtual int runApp();
+
+  private:
+
+    int argCnt = 0;
+    char **argList = nullptr;
+
+    void processEventLoop();
+
+//    virtual void onShown(WindowEvent &event) override;
 };
