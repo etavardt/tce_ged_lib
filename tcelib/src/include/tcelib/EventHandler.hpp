@@ -2,75 +2,138 @@
 
 #include <SDL2/SDL.h>
 
-//#include "Window.hpp"
-class Window;
 #include <map>
 
 class EventHandler;
 typedef unsigned long long EventHandlerId;
 typedef std::map<EventHandlerId, EventHandler &> RegisteredEventHandlerMap;
-//typedef std::pair<unsigned long long, Window &> RegisteredWindowsPair;
 typedef RegisteredEventHandlerMap::value_type RegisteredEventHandlerPair;
 
-//TODO: create Event class and extend SDL_Event?
+//TODO: ?create Event class and extend SDL_Event?
 typedef SDL_Event Event;
-typedef SDL_WindowEvent WindowEvent;
-typedef SDL_AudioDeviceEvent AudioDeviceEvent;
-
-class Window;
+typedef SDL_CommonEvent CommonEvent;                          /**< Common event data */
+typedef SDL_DisplayEvent DisplayEvent;                        /**< Display event data */
+typedef SDL_WindowEvent WindowEvent;                          /**< Window event data */
+typedef SDL_KeyboardEvent KeyboardEvent;                      /**< Keyboard event data */
+typedef SDL_TextEditingEvent TextEditingEvent;                /**< Text editing event data */
+typedef SDL_TextInputEvent TextInputEvent;                    /**< Text input event data */
+typedef SDL_MouseMotionEvent MouseMotionEvent;                /**< Mouse motion event data */
+typedef SDL_MouseButtonEvent MouseButtonEvent;                /**< Mouse button event data */ /**< ::SDL_MOUSEBUTTONDOWN or ::SDL_MOUSEBUTTONUP */
+typedef SDL_MouseWheelEvent MouseWheelEvent;                  /**< Mouse wheel event data */
+typedef SDL_JoyAxisEvent JoyAxisEvent;                        /**< Joystick axis event data */
+typedef SDL_JoyBallEvent JoyBallEvent;                        /**< Joystick ball event data */
+typedef SDL_JoyHatEvent JoyHatEvent;                          /**< Joystick hat event data */
+typedef SDL_JoyButtonEvent JoyButtonEvent;                    /**< Joystick button event data */
+typedef SDL_JoyDeviceEvent JoyDeviceEvent;                    /**< Joystick device change event data */
+typedef SDL_ControllerAxisEvent ControllerAxisEvent;          /**< Game Controller axis event data */
+typedef SDL_ControllerButtonEvent ControllerButtonEvent;      /**< Game Controller button event data */
+typedef SDL_ControllerDeviceEvent ControllerDeviceEvent;      /**< Game Controller device event data */
+typedef SDL_ControllerTouchpadEvent ControllerTouchpadEvent;  /**< Game Controller touchpad event data */
+typedef SDL_ControllerSensorEvent ControllerSensorEvent;      /**< Game Controller sensor event data */
+typedef SDL_AudioDeviceEvent AudioDeviceEvent;                /**< Audio device event data */
+typedef SDL_SensorEvent SensorEvent;                          /**< Sensor event data */
+typedef SDL_QuitEvent QuitEvent;                              /**< Quit request event data */
+typedef SDL_UserEvent UserEvent;                              /**< Custom event data */
+typedef SDL_SysWMEvent SysWMEvent;                            /**< System dependent window event data */
+typedef SDL_TouchFingerEvent TouchFingerEvent;                /**< Touch finger event data */
+typedef SDL_MultiGestureEvent MultiGestureEvent;              /**< Gesture event data */
+typedef SDL_DollarGestureEvent DollarGestureEvent;            /**< Gesture event data */
+typedef SDL_DropEvent DropEvent;                              /**< Drag and drop event data */
 
 class EventHandler {
-  private:
+private:
     static RegisteredEventHandlerMap registeredEventHandlers;
 
     // SDL_CommonEvent common;                 /**< Common event data */
-    //void Handle(SDL_CommonEvent event);
+    // void handle(CommonEvent event); // no need to handle, call onCommon asap
     // SDL_DisplayEvent display;               /**< Display event data */
+    void handle(DisplayEvent &event);
     // SDL_WindowEvent window;                 /**< Window event data */
     void handle(WindowEvent &event);
     // SDL_KeyboardEvent key;                  /**< Keyboard event data */
+    void handle(KeyboardEvent &event);
     // SDL_TextEditingEvent edit;              /**< Text editing event data */
+    void handle(TextEditingEvent &event);
     // SDL_TextInputEvent text;                /**< Text input event data */
+    void handle(TextInputEvent &event);
     // SDL_MouseMotionEvent motion;            /**< Mouse motion event data */
+    void handle(MouseMotionEvent &event);
     // SDL_MouseButtonEvent button;            /**< Mouse button event data */
+    void handle(MouseButtonEvent &event);
     // SDL_MouseWheelEvent wheel;              /**< Mouse wheel event data */
+    void handle(MouseWheelEvent &event);
     // SDL_JoyAxisEvent jaxis;                 /**< Joystick axis event data */
+    void handle(JoyAxisEvent &event);
     // SDL_JoyBallEvent jball;                 /**< Joystick ball event data */
+    void handle(JoyBallEvent &event);
     // SDL_JoyHatEvent jhat;                   /**< Joystick hat event data */
+    void handle(JoyHatEvent &event);
     // SDL_JoyButtonEvent jbutton;             /**< Joystick button event data */
+    void handle(JoyButtonEvent &event);
     // SDL_JoyDeviceEvent jdevice;             /**< Joystick device change event data */
+    void handle(JoyDeviceEvent &event);
     // SDL_ControllerAxisEvent caxis;          /**< Game Controller axis event data */
+    void handle(ControllerAxisEvent &event);
     // SDL_ControllerButtonEvent cbutton;      /**< Game Controller button event data */
+    void handle(ControllerButtonEvent &event);
     // SDL_ControllerDeviceEvent cdevice;      /**< Game Controller device event data */
+    void handle(ControllerDeviceEvent &event);
     // SDL_ControllerTouchpadEvent ctouchpad;  /**< Game Controller touchpad event data */
+    void handle(ControllerTouchpadEvent &event);
     // SDL_ControllerSensorEvent csensor;      /**< Game Controller sensor event data */
+    void handle(ControllerSensorEvent &event);
     // SDL_AudioDeviceEvent adevice;           /**< Audio device event data */
     void handle(AudioDeviceEvent &event);
     // SDL_SensorEvent sensor;                 /**< Sensor event data */
+    void handle(SensorEvent &event);
     // SDL_QuitEvent quit;                     /**< Quit request event data */
+    // void handle(QuitEvent &event); // no need to handle, call onQuit asap
     // SDL_UserEvent user;                     /**< Custom event data */
+    void handle(UserEvent &event);
     // SDL_SysWMEvent syswm;                   /**< System dependent window event data */
+    void handle(SysWMEvent &event);
     // SDL_TouchFingerEvent tfinger;           /**< Touch finger event data */
+    void handle(TouchFingerEvent &event);
     // SDL_MultiGestureEvent mgesture;         /**< Gesture event data */
+    void handle(MultiGestureEvent &event);
     // SDL_DollarGestureEvent dgesture;        /**< Gesture event data */
+    void handle(DollarGestureEvent &event);
     // SDL_DropEvent drop;                     /**< Drag and drop event data */
+    void handle(DropEvent &event);
 
-  protected:
+protected:
     // EventHandler() = default;
     // EventHandler(EventHandler const &) = delete;
     // virtual ~EventHandler() = default;
     //virtual int registerEventHandling(EventHandler &ehObject);
-    virtual int registerEventHandling();
-    bool pollEvent();
+    int registerEventHandling();
+    void unRegisterEventHandling();
 
-    void handle(Event &event);
+    // User overridable
+    virtual bool pollEvent();
+    virtual void handle(Event &event);
 
     EventHandlerId id;
 
-  public:
-    virtual void onKeyUp(Event &event) {}
-    virtual void onKeyDown(Event &event) {}
+public:
+    /**< The display orientation can't be determined */
+    virtual void onDisplayOrientationUnknown(DisplayEvent &event);
+    /**< The display is in landscape mode, with the right side up, relative to portrait mode */
+    virtual void onDisplayOrientationLanscape(DisplayEvent &event);
+    /**< The display is in landscape mode, with the left side up, relative to portrait mode */
+    virtual void onDisplayOrientationLandscapeFlipped(DisplayEvent &event);
+    /**< The display is in portrait mode */
+    virtual void onDisplayOrientationPortrait(DisplayEvent &event);
+    /**< The display is in portrait mode, upside down */
+    virtual void onDisplayOrientationPortraitFlipped(DisplayEvent &event);
+    /**< Display orientation has changed to data1 */
+    virtual void onDisplayOrientationChanged(DisplayEvent &event);
+    /**< Display has been added to the system */
+    virtual void onDisplayConnected(DisplayEvent &event);
+    /**< Display has been removed from the system */
+    virtual void onDisplayDisconnected(DisplayEvent &event);
 
+    virtual void onQuit(QuitEvent &event);
     /**< Window has been shown */
     virtual void onShown(WindowEvent &event); /**< Window has been shown */
     /**< Window has been hidden */
@@ -108,6 +171,25 @@ class EventHandler {
     /**< Window has been moved to display data1. */
     virtual void onDisplayChanged(WindowEvent &event);
 
+    /**< Keyboard event data */
+    virtual void onKeyUp(KeyboardEvent &event);
+    virtual void onKeyDown(KeyboardEvent &event);
+
+    virtual void onKeymapChanged(Event &event);
+
+    /**< Text editing event data */
+    virtual void onTextEditing(TextEditingEvent &event);
+    /**< Text input event data */
+    virtual void onTextInput(TextInputEvent &event);
+
+    /**< Mouse motion event data */
+    virtual void onMouseMotion(MouseMotionEvent &event);
+    /**< Mouse button event data */
+    virtual void onMouseButton(MouseButtonEvent &event);
+    virtual void onMouseButtonDown(MouseButtonEvent &event);
+    virtual void onMouseButtonUp(MouseButtonEvent &event);
+    /**< Mouse wheel event data */
+    virtual void onMouseWheel(MouseWheelEvent &event);
 };
 
 // typedef union SDL_Event

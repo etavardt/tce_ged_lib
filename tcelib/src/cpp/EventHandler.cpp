@@ -6,6 +6,10 @@
 
 #include "easylogging++.h"
 
+#undef UNHANDLED
+//#define UNHANDLED(x) LOG(DEBUG) << "Unhandled Event(" << x.type << ")";
+#define UNHANDLED(x) (void)(x);
+
 //typedef Exception EventException;
 class EventException : public Exception {};
 
@@ -19,6 +23,11 @@ int EventHandler::registerEventHandling() {
     registeredEventHandlers.insert(RegisteredEventHandlerPair(id, *this));
     return 1;
 }
+
+void EventHandler::unRegisterEventHandling() {
+    registeredEventHandlers.erase(id);
+}
+
 bool EventHandler::pollEvent() {
     SDL_Event event;
 
@@ -33,91 +42,295 @@ bool EventHandler::pollEvent() {
     return (event.type != SDL_QUIT);
 }
 
-void EventHandler::handle(SDL_AudioDeviceEvent &event) {
-    LOG(INFO) << "SDL_AudioDeviceEvent handled: which: " << event.which <<  ": iscapture: " << (int)event.iscapture;
-}
-
-// Handle SDL_WindowEvents
-//   Sends to The appropiate event handler's (Window or The App) member function for processing
-//
-void EventHandler::handle(SDL_WindowEvent &event) {
-    EventHandler &eh = registeredEventHandlers.at(event.windowID);
-    switch (event.event) {
-      case SDL_WINDOWEVENT_NONE:           /**< Never used */
+// SDL_CommonEvent common;                 /**< Common event data */
+// void EventHandler::handle(CommonEvent event) {}  // no need to handle, call onCommon asap
+// SDL_DisplayEvent display;               /**< Display event data */
+void EventHandler::handle(DisplayEvent &event) {
+    switch (event.event) { //SDL_DisplayEventID
+    case SDL_DISPLAYEVENT_ORIENTATION:  /**< Display orientation has changed to data1 */
+        switch (event.data1) { //SDL_DisplayOrientation
+        case SDL_ORIENTATION_UNKNOWN:            /**< The display orientation can't be determined */
+            onDisplayOrientationUnknown(event);
+            break;
+        case SDL_ORIENTATION_LANDSCAPE:          /**< The display is in landscape mode, with the right side up, relative to portrait mode */
+            onDisplayOrientationLanscape(event);
+            break;
+        case SDL_ORIENTATION_LANDSCAPE_FLIPPED:  /**< The display is in landscape mode, with the left side up, relative to portrait mode */
+            onDisplayOrientationLandscapeFlipped(event);
+            break;
+        case SDL_ORIENTATION_PORTRAIT:           /**< The display is in portrait mode */
+            onDisplayOrientationPortrait(event);
+            break;
+        case SDL_ORIENTATION_PORTRAIT_FLIPPED:   /**< The display is in portrait mode, upside down */
+            onDisplayOrientationPortraitFlipped(event);
+            break;
+        default:
+            break;
+        }
+        onDisplayOrientationChanged(event);
         break;
-      case SDL_WINDOWEVENT_SHOWN:          /**< Window has been shown */
-        eh.onShown(event);
+    case SDL_DISPLAYEVENT_CONNECTED:    /**< Display has been added to the system */
+        onDisplayConnected(event);
         break;
-      case SDL_WINDOWEVENT_HIDDEN:         /**< Window has been hidden */
-        eh.onHidden(event);
+    case SDL_DISPLAYEVENT_DISCONNECTED: /**< Display has been removed from the system */
+        onDisplayDisconnected(event);
         break;
-      case SDL_WINDOWEVENT_EXPOSED:        /**< Window has been exposed and should be redrawn */
-        eh.onExposed(event);
-        break;
-      case SDL_WINDOWEVENT_MOVED:          /**< Window has been moved to data1: data2 */
-        eh.onMoved(event);
-        break;
-      case SDL_WINDOWEVENT_RESIZED:        /**< Window has been resized to data1xdata2 */
-        eh.onResized(event);
-        break;
-      case SDL_WINDOWEVENT_SIZE_CHANGED:   /**< The window size has changed, either as a result of an API call or through the system or user changing the window size. */
-        eh.onSizeChanged(event);
-        break;
-      case SDL_WINDOWEVENT_MINIMIZED:      /**< Window has been minimized */
-        eh.onMinimized(event);
-        break;
-      case SDL_WINDOWEVENT_MAXIMIZED:      /**< Window has been maximized */
-        eh.onMaximized(event);
-        break;
-      case SDL_WINDOWEVENT_RESTORED:       /**< Window has been restored to normal size and position */
-        eh.onRestored(event);
-        break;
-      case SDL_WINDOWEVENT_ENTER:          /**< Window has gained mouse focus */
-        eh.onEnter(event);
-        break;
-      case SDL_WINDOWEVENT_LEAVE:          /**< Window has lost mouse focus */
-        eh.onLeave(event);
-        break;
-      case SDL_WINDOWEVENT_FOCUS_GAINED:   /**< Window has gained keyboard focus */
-        eh.onFocus(event);
-        break;
-      case SDL_WINDOWEVENT_FOCUS_LOST:     /**< Window has lost keyboard focus */
-        eh.onLostFocus(event);
-        break;
-      case SDL_WINDOWEVENT_CLOSE:          /**< The window manager requests that the window be closed */
-        eh.onClose(event);
-        break;
-      case SDL_WINDOWEVENT_TAKE_FOCUS:     /**< Window is being offered a focus (should SetWindowInputFocus() on itself or a subwindow, or ignore) */
-        eh.onTakeFocus(event);
-        break;
-      case SDL_WINDOWEVENT_HIT_TEST:       /**< Window had a hit test that wasn't SDL_HITTEST_NORMAL. */
-        eh.onHitTest(event);
-        break;
-      case SDL_WINDOWEVENT_ICCPROF_CHANGED:/**< The ICC profile of the window's display has changed. */
-        eh.onIccProfileChanged(event);
-        break;
-      case SDL_WINDOWEVENT_DISPLAY_CHANGED:/**< Window has been moved to display data1. */
-        eh.onDisplayChanged(event);
-        break;
-      default:
-        SDL_Log("Window %d got unknown event %d", event.windowID, event.event);
+    case SDL_DISPLAYEVENT_NONE:         /**< Never used */
+    default:
         break;
     }
-    LOG(INFO) << "SDL_WindowEvent handled: event: " << (int)event.event;
+}
+// Handle WindowEvents
+//   Sends to The appropiate event handler's (Window or The App) member function for processing
+//
+// SDL_WindowEvent window;                 /**< Window event data */
+void EventHandler::handle(WindowEvent &event) {
+    EventHandler &eh = registeredEventHandlers.at(event.windowID);
+    switch (event.event) {
+    case SDL_WINDOWEVENT_NONE:           /**< Never used */
+        break;
+    case SDL_WINDOWEVENT_SHOWN:          /**< Window has been shown */
+        eh.onShown(event);
+        break;
+    case SDL_WINDOWEVENT_HIDDEN:         /**< Window has been hidden */
+        eh.onHidden(event);
+        break;
+    case SDL_WINDOWEVENT_EXPOSED:        /**< Window has been exposed and should be redrawn */
+        eh.onExposed(event);
+        break;
+    case SDL_WINDOWEVENT_MOVED:          /**< Window has been moved to data1: data2 */
+        eh.onMoved(event);
+        break;
+    case SDL_WINDOWEVENT_RESIZED:        /**< Window has been resized to data1xdata2 */
+        eh.onResized(event);
+        break;
+    case SDL_WINDOWEVENT_SIZE_CHANGED:   /**< The window size has changed, either as a result of an API call or through the system or user changing the window size. */
+        eh.onSizeChanged(event);
+        break;
+    case SDL_WINDOWEVENT_MINIMIZED:      /**< Window has been minimized */
+        eh.onMinimized(event);
+        break;
+    case SDL_WINDOWEVENT_MAXIMIZED:      /**< Window has been maximized */
+        eh.onMaximized(event);
+        break;
+    case SDL_WINDOWEVENT_RESTORED:       /**< Window has been restored to normal size and position */
+        eh.onRestored(event);
+        break;
+    case SDL_WINDOWEVENT_ENTER:          /**< Window has gained mouse focus */
+        eh.onEnter(event);
+        break;
+    case SDL_WINDOWEVENT_LEAVE:          /**< Window has lost mouse focus */
+        eh.onLeave(event);
+        break;
+    case SDL_WINDOWEVENT_FOCUS_GAINED:   /**< Window has gained keyboard focus */
+        eh.onFocus(event);
+        break;
+    case SDL_WINDOWEVENT_FOCUS_LOST:     /**< Window has lost keyboard focus */
+        eh.onLostFocus(event);
+        break;
+    case SDL_WINDOWEVENT_CLOSE:          /**< The window manager requests that the window be closed */
+        eh.onClose(event);
+        break;
+    case SDL_WINDOWEVENT_TAKE_FOCUS:     /**< Window is being offered a focus (should SetWindowInputFocus() on itself or a subwindow, or ignore) */
+        eh.onTakeFocus(event);
+        break;
+    case SDL_WINDOWEVENT_HIT_TEST:       /**< Window had a hit test that wasn't SDL_HITTEST_NORMAL. */
+        eh.onHitTest(event);
+        break;
+    case SDL_WINDOWEVENT_ICCPROF_CHANGED:/**< The ICC profile of the window's display has changed. */
+        eh.onIccProfileChanged(event);
+        break;
+    case SDL_WINDOWEVENT_DISPLAY_CHANGED:/**< Window has been moved to display data1. */
+        eh.onDisplayChanged(event);
+        break;
+    default:
+        SDL_Log("Window %d received an unknown event %d", event.windowID, event.event);
+        LOG(INFO) << "Window(" << event.windowID << ") received an unknown event(" << (int)event.event << ")";
+        break;
+    }
+    //LOG(INFO) << "WindowEvent handled: event: " << (int)event.event;
+}
+
+// Handle WindowEvents
+//   Sends to The appropiate event handler's (Window or The App) member function for processing
+//
+// SDL_KeyboardEvent key;                  /**< Keyboard event data */
+void EventHandler::handle(KeyboardEvent &event) {
+    EventHandler &eh = registeredEventHandlers.at(event.windowID);
+    switch (event.type) {
+      /* Keyboard events */
+    case SDL_KEYDOWN:    // = 0x300, /**< Key pressed */
+        eh.onKeyDown(event);
+        break;
+    case SDL_KEYUP:                  /**< Key released */
+        eh.onKeyUp(event);
+        break;
+    }
+    // LOG(INFO) << "KeyboardEvent handled: event: " << (int)event.type
+    //           << " event.keysym.scancode: " << SDL_GetScancodeName(event.keysym.scancode)
+    //           << " event.keysym.sym: " << SDL_GetKeyName(event.keysym.sym);
+}
+// SDL_TextInputEvent text;                /**< Text input event data */
+void EventHandler::handle(TextEditingEvent &event) {
+    EventHandler &eh = registeredEventHandlers.at(event.windowID);
+    eh.onTextEditing(event);
+}
+// SDL_TextInputEvent text;                /**< Text input event data */
+void EventHandler::handle(TextInputEvent &event) {
+    EventHandler &eh = registeredEventHandlers.at(event.windowID);
+    eh.onTextInput(event);
+}
+// SDL_MouseMotionEvent motion;            /**< Mouse motion event data */
+void EventHandler::handle(MouseMotionEvent &event) {
+    EventHandler &eh = registeredEventHandlers.at(event.windowID);
+    eh.onMouseMotion(event);
+}
+// SDL_MouseButtonEvent button;            /**< Mouse button event data */
+void EventHandler::handle(MouseButtonEvent &event) {
+    EventHandler &eh = registeredEventHandlers.at(event.windowID);
+    switch (event.type) {
+    case SDL_MOUSEBUTTONDOWN:        /**< Mouse button event data */
+        eh.onMouseButtonDown(event);
+        break;
+    case SDL_MOUSEBUTTONUP:
+        eh.onMouseButtonUp(event);
+        break;
+    default:
+        eh.onMouseButton(event);
+        break;
+    }
+}
+// SDL_MouseWheelEvent wheel;              /**< Mouse wheel event data */
+void EventHandler::handle(MouseWheelEvent &event) {
+    EventHandler &eh = registeredEventHandlers.at(event.windowID);
+    eh.onMouseWheel(event);
+}
+// SDL_JoyAxisEvent jaxis;                 /**< Joystick axis event data */
+void EventHandler::handle(JoyAxisEvent &event) {
+    UNHANDLED(event);
+}
+// SDL_JoyBallEvent jball;                 /**< Joystick ball event data */
+void EventHandler::handle(JoyBallEvent &event) {
+    UNHANDLED(event);
+}
+// SDL_JoyHatEvent jhat;                   /**< Joystick hat event data */
+void EventHandler::handle(JoyHatEvent &event) {
+    UNHANDLED(event);
+}
+// SDL_JoyButtonEvent jbutton;             /**< Joystick button event data */
+void EventHandler::handle(JoyButtonEvent &event) {
+    UNHANDLED(event);
+}
+// SDL_JoyDeviceEvent jdevice;             /**< Joystick device change event data */
+void EventHandler::handle(JoyDeviceEvent &event) {
+    UNHANDLED(event);
+}
+// SDL_ControllerAxisEvent caxis;          /**< Game Controller axis event data */
+void EventHandler::handle(ControllerAxisEvent &event) {
+    UNHANDLED(event);
+}
+// SDL_ControllerButtonEvent cbutton;      /**< Game Controller button event data */
+void EventHandler::handle(ControllerButtonEvent &event) {
+    UNHANDLED(event);
+}
+// SDL_ControllerDeviceEvent cdevice;      /**< Game Controller device event data */
+void EventHandler::handle(ControllerDeviceEvent &event) {
+    UNHANDLED(event);
+}
+// SDL_ControllerTouchpadEvent ctouchpad;  /**< Game Controller touchpad event data */
+void EventHandler::handle(ControllerTouchpadEvent &event) {
+    UNHANDLED(event);
+}
+// SDL_ControllerSensorEvent csensor;      /**< Game Controller sensor event data */
+void EventHandler::handle(ControllerSensorEvent &event) {
+    UNHANDLED(event);
+}
+// SDL_AudioDeviceEvent adevice;           /**< Audio device event data */
+void EventHandler::handle(SDL_AudioDeviceEvent &event) {
+    UNHANDLED(event);
+    // LOG(INFO) << "SDL_AudioDeviceEvent handled: which: " << event.which <<  ": iscapture: " << (int)event.iscapture;
+}
+// SDL_SensorEvent sensor;                 /**< Sensor event data */
+void EventHandler::handle(SensorEvent &event) {
+    UNHANDLED(event);
+}
+// SDL_QuitEvent quit;                     /**< Quit request event data */
+// void EventHandler::handle(QuitEvent &event) {} // no need to handle call onQuit asap
+// SDL_UserEvent user;                     /**< Custom event data */
+void EventHandler::handle(UserEvent &event) {
+    UNHANDLED(event);
+}
+// SDL_SysWMEvent syswm;                   /**< System dependent window event data */
+void EventHandler::handle(SysWMEvent &event) {
+    UNHANDLED(event);
+}
+// SDL_TouchFingerEvent tfinger;           /**< Touch finger event data */
+void EventHandler::handle(TouchFingerEvent &event) {
+    UNHANDLED(event);
+}
+// SDL_MultiGestureEvent mgesture;         /**< Gesture event data */
+void EventHandler::handle(MultiGestureEvent &event) {
+    UNHANDLED(event);
+}
+// SDL_DollarGestureEvent dgesture;        /**< Gesture event data */
+void EventHandler::handle(DollarGestureEvent &event) {
+    UNHANDLED(event);
+}
+// SDL_DropEvent drop;                     /**< Drag and drop event data */
+void EventHandler::handle(DropEvent &event) {
+    UNHANDLED(event);
 }
 
 void EventHandler::handle(Event &event) {
     switch (event.type) {
-      case SDL_AUDIODEVICEADDED: // = 0x1100, /**< A new audio device is available */
-        handle((SDL_AudioDeviceEvent &)event);
+    /* Display events */
+    case SDL_DISPLAYEVENT:
+        handle(event.display);
         break;
-      case SDL_AUDIODEVICEREMOVED: // = 0x1101, /**< An audio device has been removed. */ // Does not seem to work on my laptop
-        handle((SDL_AudioDeviceEvent &)event);
+    /* Window events */
+    case SDL_WINDOWEVENT:
+        handle(event.window);
         break;
-      case SDL_WINDOWEVENT:
-        handle((SDL_WindowEvent &)event);
+
+    /* Keyboard events */
+    case SDL_KEYDOWN:    // = 0x300, /**< Key pressed */
+    case SDL_KEYUP:                  /**< Key released */
+        handle(event.key);
         break;
-      default:
+
+    case SDL_TEXTEDITING:            /**< Keyboard text editing (composition) */
+        handle(event.edit);
+        break;
+    case SDL_TEXTINPUT:              /**< Keyboard text input */
+        handle(event.text);
+        break;
+    case SDL_KEYMAPCHANGED:          /**< Keymap changed due to a system event such as an input language or keyboard layout change. */
+        onKeymapChanged(event);
+        break;
+
+    // Mouse events
+    case SDL_MOUSEMOTION:
+        handle(event.motion);
+        break;
+    case SDL_MOUSEBUTTONDOWN:        /**< Mouse button event data */
+    case SDL_MOUSEBUTTONUP:
+        handle(event.button);
+        break;
+    case SDL_MOUSEWHEEL:
+        handle(event.wheel);
+        break;
+
+    case SDL_QUIT:
+        onQuit(event.quit); // No Need to further use a handle event
+        break;
+    case SDL_AUDIODEVICEADDED: // = 0x1100, /**< A new audio device is available */
+        handle(event.adevice);
+        break;
+    case SDL_AUDIODEVICEREMOVED: // = 0x1101, /**< An audio device has been removed. */ // Does not seem to work on my laptop
+        handle(event.adevice);
+        break;
+
+    default:
         break;
     }
 }
@@ -246,75 +459,161 @@ void EventHandler::handle(Event &event) {
 //     SDL_LASTEVENT    = 0xFFFF
 // } SDL_EventType;
 
-    /**< Window has been shown */
-    void EventHandler::onShown(WindowEvent &event) {
-        // Left empty on purpose
-    }
-    /**< Window has been hidden */
-    void EventHandler::onHidden(WindowEvent &event) {
-        // Left empty on purpose
-    }
-    /**< Window has been exposed and should be redrawn */
-    void EventHandler::onExposed(WindowEvent &event) {
-        // Left empty on purpose
-    }
-    /**< Window has been moved to data1: data2 */
-    void EventHandler::onMoved(WindowEvent &event) {
-        // Left empty on purpose
-    }
-    /**< Window has been resized to data1xdata2 */
-    void EventHandler::onResized(WindowEvent &event) {
-        // Left empty on purpose
-    }
-    /**< The window size has changed, either as a result of an API call or through the system or user changing the window size. */
-    void EventHandler::onSizeChanged(WindowEvent &event) {
-        // Left empty on purpose
-    }
-    /**< Window has been minimized */
-    void EventHandler::onMinimized(WindowEvent &event) {
-        // Left empty on purpose
-    }
-    /**< Window has been maximized */
-    void EventHandler::onMaximized(WindowEvent &event) {
-        // Left empty on purpose
-    }
-    /**< Window has been restored to normal size and position */
-    void EventHandler::onRestored(WindowEvent &event) {
-        // Left empty on purpose
-    }
-    /**< Window has gained mouse focus */
-    void EventHandler::onEnter(WindowEvent &event) {
-        // Left empty on purpose
-    }
-    /**< Window has lost mouse focus */
-    void EventHandler::onLeave(WindowEvent &event) {
-        // Left empty on purpose
-    }
-    /**< Window has gained keyboard focus */
-    void EventHandler::onFocus(WindowEvent &event) {
-        // Left empty on purpose
-    }
-    /**< Window has lost keyboard focus */
-    void EventHandler::onLostFocus(WindowEvent &event) {
-        // Left empty on purpose
-    }
-    /**< The window manager requests that the window be closed */
-    void EventHandler::onClose(WindowEvent &event) {
-        // Left empty on purpose
-    }
-    /**< Window is being offered a focus (should SetWindowInputFocus() on itself or a subwindow, or ignore) */
-    void EventHandler::onTakeFocus(WindowEvent &event) {
-        // Left empty on purpose
-    }
-    /**< Window had a hit test that wasn't SDL_HITTEST_NORMAL. */
-    void EventHandler::onHitTest(WindowEvent &event) {
-        // Left empty on purpose
-    }
-    /**< The ICC profile of the window's display has changed. */
-    void EventHandler::onIccProfileChanged(WindowEvent &event) {
-        // Left empty on purpose
-    }
-    /**< Window has been moved to display data1. */
-    void EventHandler::onDisplayChanged(WindowEvent &event) {
-        // Left empty on purpose
-    }
+
+// Display Events
+/**< The display orientation can't be determined */
+void EventHandler::onDisplayOrientationUnknown(DisplayEvent &event) {
+    UNHANDLED(event);
+}
+/**< The display is in landscape mode, with the right side up, relative to portrait mode */
+void EventHandler::onDisplayOrientationLanscape(DisplayEvent &event) {
+    UNHANDLED(event);
+}
+/**< The display is in landscape mode, with the left side up, relative to portrait mode */
+void EventHandler::onDisplayOrientationLandscapeFlipped(DisplayEvent &event) {
+    UNHANDLED(event);
+}
+/**< The display is in portrait mode */
+void EventHandler::onDisplayOrientationPortrait(DisplayEvent &event) {
+    UNHANDLED(event);
+}
+/**< The display is in portrait mode, upside down */
+void EventHandler::onDisplayOrientationPortraitFlipped(DisplayEvent &event) {
+    UNHANDLED(event);
+}
+/**< Display orientation has changed to data1 */
+void EventHandler::onDisplayOrientationChanged(DisplayEvent &event) {
+    UNHANDLED(event);
+}
+/**< Display has been added to the system */
+void EventHandler::onDisplayConnected(DisplayEvent &event) {
+    UNHANDLED(event);
+}
+/**< Display has been removed from the system */
+void EventHandler::onDisplayDisconnected(DisplayEvent &event) {
+    UNHANDLED(event);
+}
+
+// Window Events
+/**< Window has been shown */
+void EventHandler::onShown(WindowEvent &event) {
+    UNHANDLED(event);
+}
+/**< Window has been hidden */
+void EventHandler::onHidden(WindowEvent &event) {
+    UNHANDLED(event);
+}
+/**< Window has been exposed and should be redrawn */
+void EventHandler::onExposed(WindowEvent &event) {
+    UNHANDLED(event);
+}
+/**< Window has been moved to data1: data2 */
+void EventHandler::onMoved(WindowEvent &event) {
+    UNHANDLED(event);
+}
+/**< Window has been resized to data1xdata2 */
+void EventHandler::onResized(WindowEvent &event) {
+    UNHANDLED(event);
+}
+/**< The window size has changed, either as a result of an API call or through the system or user changing the window size. */
+void EventHandler::onSizeChanged(WindowEvent &event) {
+    UNHANDLED(event);
+}
+/**< Window has been minimized */
+void EventHandler::onMinimized(WindowEvent &event) {
+    UNHANDLED(event);
+}
+/**< Window has been maximized */
+void EventHandler::onMaximized(WindowEvent &event) {
+    UNHANDLED(event);
+}
+/**< Window has been restored to normal size and position */
+void EventHandler::onRestored(WindowEvent &event) {
+    UNHANDLED(event);
+}
+/**< Window has gained mouse focus */
+void EventHandler::onEnter(WindowEvent &event) {
+    UNHANDLED(event);
+}
+/**< Window has lost mouse focus */
+void EventHandler::onLeave(WindowEvent &event) {
+    UNHANDLED(event);
+}
+/**< Window has gained keyboard focus */
+void EventHandler::onFocus(WindowEvent &event) {
+    UNHANDLED(event);
+}
+/**< Window has lost keyboard focus */
+void EventHandler::onLostFocus(WindowEvent &event) {
+    UNHANDLED(event);
+}
+/**< The window manager requests that the window be closed */
+void EventHandler::onClose(WindowEvent &event) {
+    UNHANDLED(event);
+}
+/**< Window is being offered a focus (should SetWindowInputFocus() on itself or a subwindow, or ignore) */
+void EventHandler::onTakeFocus(WindowEvent &event) {
+    UNHANDLED(event);
+}
+/**< Window had a hit test that wasn't SDL_HITTEST_NORMAL. */
+void EventHandler::onHitTest(WindowEvent &event) {
+    UNHANDLED(event);
+}
+/**< The ICC profile of the window's display has changed. */
+void EventHandler::onIccProfileChanged(WindowEvent &event) {
+    UNHANDLED(event);
+}
+/**< Window has been moved to display data1. */
+void EventHandler::onDisplayChanged(WindowEvent &event) {
+    UNHANDLED(event);
+}
+
+// Keyboard Events
+/**< Key pressed */
+void EventHandler::onKeyUp(KeyboardEvent &event) {
+    UNHANDLED(event);
+}
+/**< Key released */
+void EventHandler::onKeyDown(KeyboardEvent &event) {
+    UNHANDLED(event);
+}
+/**< Keymap changed due to a system event such as an input language or keyboard layout change. */
+void EventHandler::onKeymapChanged(Event &event) {
+    UNHANDLED(event);
+}
+
+/**< Text editing event data */
+void EventHandler::onTextEditing(TextEditingEvent &event) {
+    UNHANDLED(event);
+}
+/**< Text input event data */
+void EventHandler::onTextInput(TextInputEvent &event) {
+    UNHANDLED(event);
+}
+
+// Mouse Events
+/**< Mouse motion event data */
+void EventHandler::onMouseMotion(MouseMotionEvent &event) {
+    UNHANDLED(event);
+}
+/**< Mouse button event data */
+void EventHandler::onMouseButton(MouseButtonEvent &event) {
+    UNHANDLED(event);
+}
+void EventHandler::onMouseButtonDown(MouseButtonEvent &event) {
+    UNHANDLED(event);
+}
+void EventHandler::onMouseButtonUp(MouseButtonEvent &event) {
+    UNHANDLED(event);
+}
+/**< Mouse wheel event data */
+void EventHandler::onMouseWheel(MouseWheelEvent &event) {
+    UNHANDLED(event);
+}
+
+/**< Quit request event data */
+void EventHandler::onQuit(QuitEvent &event) {
+    UNHANDLED(event);
+}
+
+#undef UNHANDLED

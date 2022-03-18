@@ -55,8 +55,9 @@ class App : public EventHandler {
 
     App(); // Default constructor hidden to make it a singleton
     App(App const &) = delete;
-    virtual ~App() = default;
+    virtual ~App();
 
+    virtual void init() = 0;
     virtual int runApp();
 
   private:

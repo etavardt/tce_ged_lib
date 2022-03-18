@@ -28,7 +28,7 @@ file(GLOB HEADER_FILES LIST_DIRECTORIES false
 )
 
 add_library(tcelib STATIC ${SOURCE_FILES})
-target_link_libraries(tcelib SDL2 SDL2main setupapi imm32 winmm version)
+target_link_libraries(tcelib mingw32 SDL2_gfx SDL2_image SDL2_net SDL2_ttf SDL2main SDL2 setupapi imm32 winmm version)
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     if (APPLE)
@@ -71,7 +71,7 @@ file(GLOB TEST_SOURCE_FILES LIST_DIRECTORIES false test/*.cpp)
 list(FILTER SOURCE_FILES EXCLUDE REGEX ".*main.cpp$")
 add_executable(tcelib_test ${TEST_SOURCE_FILES} ${SOURCE_FILES} ${HEADER_FILES})
 target_link_libraries(tcelib_test gtest_main)
-target_link_libraries(tcelib_test SDL2 SDL2main setupapi imm32 winmm version)
+target_link_libraries(tcelib_test mingw32 SDL2_gfx SDL2_image SDL2_net SDL2_ttf SDL2main SDL2 setupapi imm32 winmm version)
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     target_link_libraries(tcelib_test ${libbacktrace_BINARY_DIR}/libbacktrace.a)
 endif ()

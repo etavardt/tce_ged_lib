@@ -1,14 +1,19 @@
 #include "App.hpp"
 
 #include "Window.hpp"
+#include "Exception.hpp"
 
 #include "easylogging++.h"
 
 App *App::app = nullptr;
 
 App::App() {
-    id = NULL;
+    id = 0;
     registerEventHandling();
+}
+
+App::~App() {
+    unRegisterEventHandling();
 }
 
 App &App::getApp() {
@@ -26,7 +31,3 @@ void App::processEventLoop() {
         // TODO: Timing and Graphics processing.
     };
 }
-
-// void App::onShown(WindowEvent &event) {
-//     LOG(INFO) << "Received the App::onShown event";
-// }

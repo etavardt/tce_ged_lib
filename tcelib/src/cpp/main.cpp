@@ -20,6 +20,7 @@ int main(int ac, char **av) {
 
         App &app = App::getApp();
         app.processCmdLine(ac, av);
+        app.init();
         app.runApp();
     } catch (Exception &e) {
         LOG(ERROR) << "Exception caught in main: " << e.getMsg() << endl;
