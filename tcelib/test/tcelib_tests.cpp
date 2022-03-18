@@ -9,6 +9,7 @@ public:
     static MyApp &getApp() { return myApp; }
     static MyApp &myApp;
 
+    void init() override {}
     int runApp() override { return 0; }
     int processCmdLine(int argCnt, char **argList) override { return 0; }
 };
