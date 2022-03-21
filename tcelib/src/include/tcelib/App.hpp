@@ -57,7 +57,7 @@ class App : public EventHandler {
     App(App const &) = delete;
     virtual ~App();
 
-    virtual void init() = 0;
+    virtual void init();
     virtual int runApp();
 
   private:

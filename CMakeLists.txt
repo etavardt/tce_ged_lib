@@ -47,11 +47,42 @@ FetchContent_Declare(
     URL https://github.com/google/googletest/archive/e2239ee6043f73722e7aa812a459f54a28552929.zip
 )
 
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/sdl2)
+
+# Find SDL2, SDL2_image and SDL2_gfx librarie
+find_package(SDL2 REQUIRED)
+find_package(SDL2_image REQUIRED)
+find_package(SDL2_gfx REQUIRED)
+find_package(SDL2_ttf REQUIRED)
+find_package(SDL2_net REQUIRED)
+find_package(SDL2_mixer REQUIRED)
+
+
 # set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 # find_package(SDL2 REQUIRED)
+# find_package(SDL2_image REQUIRED)
+
+# find_package(PNG REQUIRED)
+# find_package(Freetype REQUIRED)
+# # find_package(OpenGL REQUIRED)
+
+# find_library(SDL2_LIBRARY SDL2)
+# find_library(SDL2MAIN_LIBRARY SDL2main)
+
+# find_library(PNG_LIBRARY png)
+# find_library(JPEG_LIBRARY jpeg)
+# find_library(TIFF_LIBRARY tiff)
+# find_library(WEBP_LIBRARY webp)
+# find_library(LZ_LIBRARY lz)
+
+
+
 # #find_file(SDL2_INCLUDE_DIR NAME SDL.h HINTS SDL2)
 # #find_library(SDL2_LIBRARY NAME SDL2)
 # cmake_print_variables(SDL2_INCLUDE_DIR)
+# cmake_print_variables(SDL2_LIBRARY)
+# cmake_print_variables(FREETYPE_INCLUDE_DIRS)
+# cmake_print_variables(FREETYPE_LIBRARIES)
 # cmake_print_variables(SDL2_LIBRARY)
 
 

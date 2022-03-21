@@ -13,7 +13,7 @@ include_directories(
 )
 
 file(GLOB SOURCE_FILES LIST_DIRECTORIES false
-    ../3rdParty/easyloggingpp/src/*.cc
+#    ../3rdParty/easyloggingpp/src/*.cc
     src/cpp/*.cpp
 )
 
@@ -26,7 +26,15 @@ file(GLOB HEADER_FILES LIST_DIRECTORIES false
 
 add_executable(ged ${SOURCE_FILES})
 target_link_libraries(ged tcelib)
-target_link_libraries(ged mingw32 SDL2_mixer SDL2_gfx SDL2_image SDL2_net SDL2_ttf SDL2main SDL2 setupapi imm32 winmm version)
+# target_link_libraries(ged mingw32)
+target_link_libraries(${PROJECT_NAME} SDL2::Main SDL2::Image SDL2::GFX SDL2::TTF)
+#target_link_libraries(ged mingw32 SDL2_mixer SDL2_gfx SDL2_image SDL2_net SDL2_ttf SDL2main SDL2 setupapi imm32 winmm version harfbuzz)
+
+#target_link_libraries(ged mingw32 SDL2_mixer SDL2_gfx SDL2_image SDL2_net SDL2_ttf SDL2main SDL2 setupapi imm32 winmm version jpeg png tiff webp harfbuzz)
+# target_link_libraries(ged mingw32 SDL2_mixer SDL2_gfx SDL2_image SDL2_net SDL2_ttf SDL2main SDL2 setupapi imm32 winmm version harfbuzz)
+# target_link_libraries(ged ${FREETYPE_LIBRARIES})
+# target_link_libraries(ged ${SDL2} ${PNGLIB} ${JPEG} ${TIFF} ${WEBP} ${SDL2_IMAGE} ${LZ}) #SDL2_image dep libs
+
 #target_include_directories(ged PUBLIC 3rdParty/easyloggingpp)
 #target_link_directories(ged build/tcelib)
 
@@ -67,12 +75,12 @@ endif()
 enable_testing()
 
 file(GLOB TEST_SOURCE_FILES LIST_DIRECTORIES false test/*.cpp)
-list(FILTER SOURCE_FILES EXCLUDE REGEX ".*main.cpp$")
+#list(FILTER SOURCE_FILES EXCLUDE REGEX ".*main.cpp$")
 add_executable(ged_test ${TEST_SOURCE_FILES} ${SOURCE_FILES} ${HEADER_FILES})
 target_link_libraries(ged_test gtest_main tcelib)
-if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-    target_link_libraries(ged_test ${libbacktrace_BINARY_DIR}/libbacktrace.a)
-endif ()
+# if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+#     target_link_libraries(ged_test ${libbacktrace_BINARY_DIR}/libbacktrace.a)
+# endif ()
 
 include(GoogleTest)
 gtest_discover_tests(ged_test)

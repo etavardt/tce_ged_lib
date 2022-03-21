@@ -28,6 +28,14 @@ void EventHandler::unRegisterEventHandling() {
     registeredEventHandlers.erase(id);
 }
 
+String EventHandler::getSdlErrorMsg(String msgPrefix) {
+    String error = SDL_GetError();
+    String msg = format("%sError(%s)", msgPrefix, error);
+    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "SdlWin Error", msg.c_str(), nullptr);
+
+    return msg;
+}
+
 bool EventHandler::pollEvent() {
     SDL_Event event;
 

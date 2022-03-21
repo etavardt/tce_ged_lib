@@ -56,13 +56,13 @@ int GedApp::processCmdLine(int argCnt, char **argList) {
     return 1;
 }
 
-String GedApp::getSdlErrorMsg(String msgPrefix) {
-    String error = SDL_GetError();
-    String msg = format("%sError(%s)", msgPrefix, error);
-    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "SdlWin Error", msg.c_str(), nullptr);
+// String GedApp::getSdlErrorMsg(String msgPrefix) {
+//     String error = SDL_GetError();
+//     String msg = format("%sError(%s)", msgPrefix, error);
+//     SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "SdlWin Error", msg.c_str(), nullptr);
 
-    return msg;
-}
+//     return msg;
+// }
 
 void GedApp::onQuit(QuitEvent &event) {
     UNUSED(event);

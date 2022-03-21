@@ -1,8 +1,9 @@
 #pragma once
 
+#include <map>
 #include <SDL2/SDL.h>
 
-#include <map>
+#include "String.hpp"
 
 class EventHandler;
 typedef unsigned long long EventHandlerId;
@@ -116,6 +117,8 @@ protected:
     EventHandlerId id;
 
 public:
+    String getSdlErrorMsg(String msgPrefix);
+
     /**< The display orientation can't be determined */
     virtual void onDisplayOrientationUnknown(DisplayEvent &event);
     /**< The display is in landscape mode, with the right side up, relative to portrait mode */

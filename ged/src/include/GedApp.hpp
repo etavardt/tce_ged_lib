@@ -13,7 +13,7 @@ public:
     int runApp() override;
     int processCmdLine(int argCnt, char **argList) override;
 
-    String getSdlErrorMsg(String msgPrefix);
+//    String getSdlErrorMsg(String msgPrefix);
 
     void onQuit(QuitEvent &event) override;
 };
