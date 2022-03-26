@@ -1,5 +1,7 @@
 #include "Window.hpp"
 
+#include <SDL2/SDL_ttf.h>
+
 #include "App.hpp"
 #include "String.hpp"
 #include "Exception.hpp"
@@ -10,7 +12,6 @@ Window::Window() {
 
 Window::~Window() {
     LOG(TRACE) << "Window::~Window().";
-    //SdlWin::~SdlWin();
     // SDL_DestroyTexture(texture);
 
     if (renderer != nullptr) SDL_DestroyRenderer(renderer);
@@ -23,13 +24,13 @@ void Window::createWindow() {
     LOG(TRACE) << "Pre Window.init().";
     init();
 
-    width = 1024;//desktopDm.w;
-    height = 768;//desktopDm.h;
+    // width  = desktopDm.w;
+    // height = desktopDm.h;
     window = SDL_CreateWindow(const_cast<char *>(App::getApp().getAppFileName()),
-                                          SDL_WINDOWPOS_UNDEFINED,
-                                          SDL_WINDOWPOS_UNDEFINED,
-                                          width,
-                                          height,
+                                          SDL_WINDOWPOS_CENTERED, //SDL_WINDOWPOS_UNDEFINED,
+                                          SDL_WINDOWPOS_CENTERED, //SDL_WINDOWPOS_UNDEFINED,
+                                          desktopDm.w,
+                                          desktopDm.h,
 //                                          SDL_WINDOW_HIDDEN | SDL_WINDOW_RESIZABLE);
 //                                          SDL_WINDOW_FULLSCREEN_DESKTOP | SDL_WINDOW_HIDDEN | SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
                                           SDL_WINDOW_FULLSCREEN_DESKTOP | SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
@@ -43,7 +44,10 @@ void Window::createWindow() {
     }
 
     // ??? onCreateClient Area ??? Renderer(?DirectX, OpenGL, SDL_Surface/SLD_Texture?) ??? User Control ???
-    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+    //SDL_Surface *surface = SDL_GetWindowSurface(window);
+    //renderer = SDL_CreateSoftwareRenderer(surface);
+    // renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_SOFTWARE);
 
     if (renderer != nullptr) {
         if (SDL_SetRenderDrawColor(renderer, backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a) != 0) { //Set the draw color
@@ -54,6 +58,9 @@ void Window::createWindow() {
             String msg = getErrorMsg("SDL_RenderClear failed");
             throw Exception(msg);
         }
+        SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
+        SDL_RenderSetLogicalSize(renderer, desktopDm.w, desktopDm.h);
+
         SDL_RenderPresent(renderer); //Update the renderer which will show the renderer cleared by the draw color
     } else {
         String msg = getErrorMsg("SDL_CreateRenderer failed");
@@ -79,24 +86,53 @@ void Window::init() {
         throw Exception(msg);
     };
     getDisplayMode(0);
+
+    aspectRatio = (1.0f * desktopDm.w)/desktopDm.h;
+    minWidth  = desktopDm.w/2;
+    minHeight = desktopDm.h/2;
 }
 
-bool Window::toggleFullscreen()
-{
-    // LOG(TRACE) << "In Window::toggleFullscreen.";
-    Uint32 flags = (SDL_GetWindowFlags(window) ^ SDL_WINDOW_FULLSCREEN_DESKTOP);
+bool Window::toggleFullscreen() {
+    LOG(TRACE) << "In Window::toggleFullscreen.";
+    Uint32 flags = (SDL_GetWindowFlags(window) ^ SDL_WINDOW_FULLSCREEN); // SDL_WINDOW_FULLSCREEN_DESKTOP
     if (SDL_SetWindowFullscreen(window, flags) < 0) { // NOTE: this takes FLAGS as the second param, NOT true/false!
-        LOG(TRACE) << "Toggling fullscreen mode failed: " << SDL_GetError() << std::endl;
+        LOG(ERROR) << "Toggling fullscreen mode failed: " << SDL_GetError();
         return -1;
     }
-    if ((flags & SDL_WINDOW_FULLSCREEN_DESKTOP) != 0) {
+    if ((flags & SDL_WINDOW_FULLSCREEN) != 0) { // SDL_WINDOW_FULLSCREEN_DESKTOP
+        LOG(INFO) << "\tSDL_WINDOW_FULLSCREEN used";
         SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
-        SDL_RenderSetLogicalSize(renderer, width, height); // TODO: pass renderer as param maybe?
+        SDL_RenderSetLogicalSize(renderer, desktopDm.w, desktopDm.h); // TODO: pass renderer as param maybe?
         return 1;
     }
-    SDL_SetWindowSize(window, width, height);
+    SDL_SetWindowSize(window, desktopDm.w/2, desktopDm.h/2);
+    SDL_SetWindowPosition(window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
     return 0;
 }
+
+void Window::displayText(const String &str, const int x, const int y) {
+    int xPos = x;
+    int yPos = y;
+    SDL_Surface * surface = TTF_RenderText_Solid(App::getApp().getFont(), str.c_str(), foregroundColor);
+    if (surface == nullptr) {
+        String msg = getErrorMsg("TTF_RenderText_Solid failed");
+        throw Exception(msg);
+    }
+    SDL_Texture * texture = SDL_CreateTextureFromSurface(renderer, surface);
+
+    if (x == CENTERED) {
+        xPos = (desktopDm.w / 2) - (surface->w / 2);
+    }
+    if (y == CENTERED) {
+        yPos = (desktopDm.h / 2) - (surface->h / 2);
+    }
+    SDL_Rect dstRect = {xPos, yPos, surface->w, surface->h};
+    SDL_RenderCopy(renderer, texture, &(surface->clip_rect), &dstRect);
+    //SDL_RenderPresent(renderer);
+
+    SDL_DestroyTexture(texture);
+    SDL_FreeSurface(surface);
+};
 
 String Window::getErrorMsg(String msgPrefix) {
     String error = SDL_GetError();
@@ -106,13 +142,14 @@ String Window::getErrorMsg(String msgPrefix) {
 
 // Event funtions
 
-// onExposed is equivalent to windows onDraw or onPaint events
+// onExposed is equivalent to windows MFC onDraw or onPaint events
 void Window::onExposed(WindowEvent &event) { /**< Window has been exposed and should be redrawn */
-    // LOG(TRACE) << "Received the GedWindow::onExposed event.event(" << (int)event.event << ")";
+    LOG(TRACE) << "Received the GedWindow::onExposed event.event(" << (int)event.event << ")";
     SDL_RendererInfo info;
     SDL_GetRendererInfo(renderer, &info);
 
-    if (SDL_SetRenderDrawColor(renderer,backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a) != 0) { //Set the draw color
+    //Set the draw color
+    if (SDL_SetRenderDrawColor(renderer,backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a) != 0) {
         String msg = getErrorMsg("SDL_SetRenderDrawColor failed");
         throw Exception(msg);
     }
@@ -123,7 +160,10 @@ void Window::onExposed(WindowEvent &event) { /**< Window has been exposed and sh
 
     onDraw(event);
 
+    LOG(INFO) << "Pre SDL_RenderPresent";
     SDL_RenderPresent(renderer); //Update the renderer which will show the renderer cleared by the draw color
+    //SDL_UpdateWindowSurface(window);
+    LOG(INFO) << "Post SDL_RenderPresent";
 }
 /**< The window size has changed, either as a result of an API call or through the system or user changing the window size. */
 // void Window::onSizeChanged(WindowEvent &event) {

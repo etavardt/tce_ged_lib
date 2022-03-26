@@ -5,10 +5,11 @@
 #include "Window.hpp"
 
 #include "easylogging++.h"
+#include "unused_macros.hpp"
 
 #undef UNHANDLED
-//#define UNHANDLED(x) LOG(DEBUG) << "Unhandled Event(" << x.type << ")";
-#define UNHANDLED(x) (void)(x);
+#define UNHANDLED(x) LOG(DEBUG) << "Unhandled Event(" << x.type << ")";
+//#define UNHANDLED(x) (void)(x);
 
 //typedef Exception EventException;
 class EventException : public Exception {};
@@ -602,7 +603,8 @@ void EventHandler::onTextInput(TextInputEvent &event) {
 // Mouse Events
 /**< Mouse motion event data */
 void EventHandler::onMouseMotion(MouseMotionEvent &event) {
-    UNHANDLED(event);
+    // UNHANDLED(event);
+    UNUSED(event);
 }
 /**< Mouse button event data */
 void EventHandler::onMouseButton(MouseButtonEvent &event) {

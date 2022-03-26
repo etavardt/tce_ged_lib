@@ -33,10 +33,11 @@
 ///////////////////////////////////////////////////////////////////////////////
 #pragma once
 
+#include <SDL2/SDL_ttf.h>
 #include "EventHandler.hpp"
 
 class App : public EventHandler {
-  public:
+public:
     void operator=(App const &) = delete;
 
     static App &getApp();
@@ -47,10 +48,11 @@ class App : public EventHandler {
         return 1;
     }
     char *getAppFileName() { return argList[0]; }
+    TTF_Font *getFont() { return font; };
 
     friend int main(int ac, char **av);
 
-  protected:
+protected:
     static App *app;
 
     App(); // Default constructor hidden to make it a singleton
@@ -60,7 +62,10 @@ class App : public EventHandler {
     virtual void init();
     virtual int runApp();
 
-  private:
+    // TODO: Handle more that one font
+    TTF_Font *font = nullptr;
+
+private:
 
     int argCnt = 0;
     char **argList = nullptr;
