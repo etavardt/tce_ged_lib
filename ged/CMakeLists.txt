@@ -71,6 +71,24 @@ if (CMAKE_BUILD_TYPE STREQUAL "Debug")
         endif()
 endif()
 
+add_custom_command(
+    TARGET ged POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/ged/resources/fonts ${CMAKE_BINARY_DIR}/fonts
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/ged/resources/images ${CMAKE_BINARY_DIR}/images
+    COMMENT "Copying recources" VERBATIM
+)
+#${CMAKE_SOURCE_DIR}/recources/fonts $<TARGET_FILE_DIR:ged>/fonts
+#DEPENDS ${ASSETS}
+
+# add_custom_command(
+#     TARGET ged POST_BUILD
+#     COMMAND ${CMAKE_COMMAND} -E copy_directory
+#     ${CMAKE_SOURCE_DIR}/recources/Images $<TARGET_FILE_DIR:ged>/images
+#     COMMENT "Copying recources" VERBATIM
+#     #DEPENDS ${ASSETS}
+# )
+
+
 # TomC -- Unit Testing
 enable_testing()
 

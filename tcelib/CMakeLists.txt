@@ -28,14 +28,7 @@ file(GLOB HEADER_FILES LIST_DIRECTORIES false
 )
 
 add_library(tcelib STATIC ${SOURCE_FILES})
-#target_link_libraries(tcelib mingw32 SDL2_gfx SDL2_image SDL2_net SDL2_ttf SDL2main SDL2 setupapi imm32 winmm version harfbuzz)
-#target_link_libraries(tcelib mingw32)
-# Link SDL2::Main, SDL2::Image and SDL2::GFX to our project
 target_link_libraries(${PROJECT_NAME} SDL2::Main SDL2::Image SDL2::GFX SDL2::TTF)
-
-#target_link_libraries(tcelib mingw32 SDL2_gfx SDL2_image SDL2_net SDL2_ttf SDL2main SDL2 setupapi imm32 winmm version jpeg png tiff webp freetype harfbuzz)
-#target_link_libraries(tcelib ${FREETYPE_LIBRARIES})
-#target_link_libraries(tcelib ${SDL2_LIBRARY} ${PNG_LIBRARY} ${JPEG_LIBRARY} ${TIFF_LIBRARY} ${WEBP_LIBRARY} ${SDL2_IMAGE_LIBRARY} ${LZ_LIBRARY}) #SDL2_image dep libs
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     if (APPLE)
@@ -75,16 +68,10 @@ endif()
 enable_testing()
 
 file(GLOB TEST_SOURCE_FILES LIST_DIRECTORIES false test/*.cpp)
-#list(FILTER SOURCE_FILES EXCLUDE REGEX ".*main.cpp$")
-#list(FILTER SOURCE_FILES EXCLUDE REGEX ".*easylogging/+/+.cpp$")
-#add_executable(tcelib_test ${TEST_SOURCE_FILES} ${SOURCE_FILES} ${HEADER_FILES})
+
 add_executable(tcelib_test ${TEST_SOURCE_FILES} ${HEADER_FILES})
 target_link_libraries(tcelib_test gtest_main)
-#target_link_libraries(tcelib_test mingw32)
 target_link_libraries(tcelib_test tcelib)
-# if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-#     target_link_libraries(tcelib_test ${libbacktrace_BINARY_DIR}/libbacktrace.a)
-# endif ()
 
 include(GoogleTest)
 gtest_discover_tests(tcelib_test)

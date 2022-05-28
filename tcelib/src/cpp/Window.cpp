@@ -1,7 +1,5 @@
 #include "Window.hpp"
 
-#include <SDL2/SDL_ttf.h>
-
 #include "App.hpp"
 #include "String.hpp"
 #include "Exception.hpp"
@@ -111,15 +109,15 @@ bool Window::toggleFullscreen() {
 }
 
 void Window::displayText(const String &str, const int x, const int y) {
-    int xPos = x;
-    int yPos = y;
-    SDL_Surface * surface = TTF_RenderText_Solid(App::getApp().getFont(), str.c_str(), foregroundColor);
+    SDL_Surface *surface = TTF_RenderText_Solid(App::getApp().getFont(), str.c_str(), foregroundColor);
     if (surface == nullptr) {
         String msg = getErrorMsg("TTF_RenderText_Solid failed");
         throw Exception(msg);
     }
     SDL_Texture * texture = SDL_CreateTextureFromSurface(renderer, surface);
 
+    int xPos = x;
+    int yPos = y;
     if (x == CENTERED) {
         xPos = (desktopDm.w / 2) - (surface->w / 2);
     }
@@ -128,11 +126,39 @@ void Window::displayText(const String &str, const int x, const int y) {
     }
     SDL_Rect dstRect = {xPos, yPos, surface->w, surface->h};
     SDL_RenderCopy(renderer, texture, &(surface->clip_rect), &dstRect);
-    //SDL_RenderPresent(renderer);
 
     SDL_DestroyTexture(texture);
     SDL_FreeSurface(surface);
 };
+
+void Window::displayImage(Image &image, const int x, const int y) {
+    LOG(TRACE) << "In Window::displayImage.";
+    SDL_Surface *surface = image.getSurface();
+    LOG(TRACE) << "In Window::displayImage 1.";
+    SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
+    LOG(TRACE) << "In Window::displayImage 2.";
+
+    if (texture == nullptr) {
+        LOG(TRACE) << "In Window::displayImage 3.";
+        String msg = getErrorMsg("SDL_CreateTextureFromSurface failed");
+        throw Exception(msg);
+    }
+    LOG(TRACE) << "In Window::displayImage 4.";
+
+    int xPos = x;
+    int yPos = y;
+    if (x == CENTERED) {
+        xPos = (desktopDm.w / 2) - (surface->w / 2);
+    }
+    if (y == CENTERED) {
+        yPos = (desktopDm.h / 2) - (surface->h / 2);
+    }
+    SDL_Rect dstRect = {xPos, yPos, surface->w, surface->h};
+    SDL_RenderCopy(renderer, texture, &(surface->clip_rect), &dstRect);
+
+    SDL_DestroyTexture(texture);
+}
+
 
 String Window::getErrorMsg(String msgPrefix) {
     String error = SDL_GetError();
