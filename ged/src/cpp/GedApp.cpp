@@ -2,6 +2,7 @@
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
+#include <SDL2/SDL_image.h>
 #include "easylogging++.h"
 
 #include "String.hpp"
@@ -35,6 +36,11 @@ void GedApp::init() {
             throw Exception(msg);
         }
     }
+    if (IMG_Init( IMG_INIT_JPG | IMG_INIT_PNG | IMG_INIT_TIF | IMG_INIT_WEBP ) == 0) {
+        String msg = getSdlErrorMsg("SDL_Init failed: ");
+        throw Exception(msg);
+    }
+
 }
 
 int GedApp::runApp() {

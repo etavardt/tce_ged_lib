@@ -4,6 +4,8 @@
 
 #include "String.hpp"
 #include "Color.hpp"
+#include "Image.hpp"
+
 enum TextPosition {
     CENTERED = -1
 };
@@ -22,7 +24,9 @@ protected:
     Color backgroundColor = {0,0,0,255};
     Color foregroundColor = {255,255,255,255};
 
-    float aspectRatio;
+    float aspectRatio = 0.75f;
+    float scale = 1.0f;
+
     unsigned int minWidth  = 0;
     unsigned int minHeight = 0;
 
@@ -31,6 +35,7 @@ protected:
     virtual void init();
 
     void displayText(const String &str, const int x, const int y);
+    void displayImage(Image &image, const int x, const int y);
 
 public:
     Window();
