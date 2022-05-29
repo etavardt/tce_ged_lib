@@ -27,8 +27,8 @@ protected:
     float aspectRatio = 0.75f;
     float scale = 1.0f;
 
-    unsigned int minWidth  = 0;
-    unsigned int minHeight = 0;
+    int minWidth  = 0;
+    int minHeight = 0;
 
     SDL_Window *window = nullptr;
     SDL_Renderer *renderer = nullptr;

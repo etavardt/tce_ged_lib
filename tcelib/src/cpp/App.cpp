@@ -21,23 +21,32 @@ App::~App() {
 }
 
 void App::init() {
-    /* Initialize defaults, Video and Audio */
-    // if((SDL_Init(SDL_INIT_VIDEO|SDL_INIT_AUDIO) == -1)) {
+    // Initialize defaults, Video and Audio
     if ( SDL_Init( SDL_INIT_EVERYTHING ) < 0 ) {
         String msg = getSdlErrorMsg("Error initializing SDL: ");
         throw Exception(msg);
     }
 
-    if ( IMG_Init(IMG_INIT_PNG) < 0 ) {
+    // Initialize SDL_image
+    if ( IMG_Init(IMG_INIT_JPG | IMG_INIT_PNG | IMG_INIT_TIF | IMG_INIT_WEBP) < 0 ) {
         String msg = getSdlErrorMsg("Error initializing SDL_image: ");
         throw Exception(msg);
     }
 
     // Initialize SDL_ttf
     if ( TTF_Init() < 0 ) {
-        String msg = getSdlErrorMsg("Error intializing SDL_ttf: ");
+        String msg = getSdlErrorMsg("Error initializing SDL_ttf: ");
         throw Exception(msg);
     }
+}
+
+void App::cleanUp() {
+    LOG(INFO) << "Cleaning up and shuting down all SDL subsystems.";
+
+    /* Shutdown all subsystems */
+    TTF_Quit();
+    IMG_Quit();
+    SDL_Quit();
 }
 
 App &App::getApp() {
@@ -51,7 +60,7 @@ int App::runApp() {
 }
 
 void App::processEventLoop() {
-    while (EventHandler::pollEvent()) {
+    while (EventHandler::pollAndHandleEvent()) {
         // TODO: Timing and Graphics processing.
     };
 }

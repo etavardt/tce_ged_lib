@@ -37,7 +37,7 @@ String EventHandler::getSdlErrorMsg(String msgPrefix) {
     return msg;
 }
 
-bool EventHandler::pollEvent() {
+bool EventHandler::pollAndHandleEvent() {
     SDL_Event event;
 
     if (SDL_PollEvent(&event)) {
@@ -62,7 +62,7 @@ void EventHandler::handle(DisplayEvent &event) {
             onDisplayOrientationUnknown(event);
             break;
         case SDL_ORIENTATION_LANDSCAPE:          /**< The display is in landscape mode, with the right side up, relative to portrait mode */
-            onDisplayOrientationLanscape(event);
+            onDisplayOrientationLandscape(event);
             break;
         case SDL_ORIENTATION_LANDSCAPE_FLIPPED:  /**< The display is in landscape mode, with the left side up, relative to portrait mode */
             onDisplayOrientationLandscapeFlipped(event);
@@ -475,7 +475,7 @@ void EventHandler::onDisplayOrientationUnknown(DisplayEvent &event) {
     UNHANDLED(event);
 }
 /**< The display is in landscape mode, with the right side up, relative to portrait mode */
-void EventHandler::onDisplayOrientationLanscape(DisplayEvent &event) {
+void EventHandler::onDisplayOrientationLandscape(DisplayEvent &event) {
     UNHANDLED(event);
 }
 /**< The display is in landscape mode, with the left side up, relative to portrait mode */

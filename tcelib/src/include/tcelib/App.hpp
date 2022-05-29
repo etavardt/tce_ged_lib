@@ -60,6 +60,7 @@ protected:
     virtual ~App();
 
     virtual void init();
+    virtual void cleanUp(); // Clean up what init(ed) items
     virtual int runApp();
 
     // TODO: Handle more that one font

@@ -15,20 +15,20 @@ using std::endl;
 
 extern "C"
 int main(int ac, char **av) {
+    START_EASYLOGGINGPP(ac, av);
+    App &app = App::getApp();
     try {
-        START_EASYLOGGINGPP(ac, av);
-
-        App &app = App::getApp();
         app.processCmdLine(ac, av);
         app.init();
         app.runApp();
     } catch (Exception &e) {
-        LOG(ERROR) << "Exception caught in main: " << e.getMsg() << endl;
+        LOG(ERROR) << "Unhandled Exception caught in main: " << e.getMsg() << endl;
     } catch (const std::exception &e) {
-        LOG(ERROR) << "std::exception caught in main: " << e.what() << endl;
+        LOG(ERROR) << "Unhandled std::exception caught in main: " << e.what() << endl;
     } catch (...) {
-        LOG(ERROR) << "Unknown Exception caught in main" << endl;
+        LOG(ERROR) << "Unhandled Unknown Exception caught in main" << endl;
     }
 
+    app.cleanUp();
     return 0;
 } /* end of main() */

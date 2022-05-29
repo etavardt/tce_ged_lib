@@ -111,7 +111,7 @@ protected:
     void unRegisterEventHandling();
 
     // User overridable
-    virtual bool pollEvent();
+    virtual bool pollAndHandleEvent();
     virtual void handle(Event &event);
 
     EventHandlerId id;
@@ -122,7 +122,7 @@ public:
     /**< The display orientation can't be determined */
     virtual void onDisplayOrientationUnknown(DisplayEvent &event);
     /**< The display is in landscape mode, with the right side up, relative to portrait mode */
-    virtual void onDisplayOrientationLanscape(DisplayEvent &event);
+    virtual void onDisplayOrientationLandscape(DisplayEvent &event);
     /**< The display is in landscape mode, with the left side up, relative to portrait mode */
     virtual void onDisplayOrientationLandscapeFlipped(DisplayEvent &event);
     /**< The display is in portrait mode */
